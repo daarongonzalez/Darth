@@ -305,8 +305,19 @@ const CATEGORIES = [
 
   $("startBtn").onclick = () => { state.phase = "board"; save(); show(); };
 
+  // Two taps to start over, so a stray tap cannot wipe the scores (no pop-up dialogs, which some hosts block)
+  let newGameTimer = null;
+  function resetNewGameBtn() {
+    clearTimeout(newGameTimer); newGameTimer = null;
+    $("newGameBtn").textContent = "New Game";
+  }
   $("newGameBtn").onclick = () => {
-    if (!confirm("Start a new game? Scores and played cards will be cleared.")) return;
+    if (!newGameTimer) {
+      $("newGameBtn").textContent = "Tap again to clear scores";
+      newGameTimer = setTimeout(resetNewGameBtn, 4000);
+      return;
+    }
+    resetNewGameBtn();
     state = { phase: "setup", players: state.players.map((p) => ({ name: p.name, score: 0 })), used: {} };
     save(); show();
   };
